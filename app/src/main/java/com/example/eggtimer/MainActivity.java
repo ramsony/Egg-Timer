@@ -1,5 +1,6 @@
 package com.example.eggtimer;
 
+import android.media.MediaPlayer;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,20 +14,44 @@ public class MainActivity extends AppCompatActivity {
 
     TextView timerTextView;
     SeekBar timerSeekBar;
+    Button goButton;
+    boolean counterIsActive = false;
+    CountDownTimer countDownTimer;
 
+    public void resetTimer(){
+
+        timerTextView.setText("0:00");
+        timerSeekBar.setProgress(0);
+        timerSeekBar.setEnabled(true);
+        countDownTimer.cancel();
+        goButton.setText("GO!");
+        counterIsActive = false;
+
+    }
     public void buttonGo(View view){
-        new CountDownTimer(timerSeekBar.getProgress() * 1000 + 100,1000){
+        if(counterIsActive) resetTimer();
+        else {
 
-            @Override
-            public void onTick(long millisUntilFinished) {
-                upDateTimer((int) millisUntilFinished/1000);
-            }
+            counterIsActive = true;
+            timerSeekBar.setEnabled(false);
+            goButton.setText("STOP!");
 
-            @Override
-            public void onFinish() {
-                Log.i("Finished","Timer all done");
-            }
-        }.start();
+            countDownTimer = new CountDownTimer(timerSeekBar.getProgress() * 1000 + 100,1000){
+
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    upDateTimer((int) millisUntilFinished/1000);
+                }
+
+                @Override
+                public void onFinish() {
+                    MediaPlayer mpLayer = MediaPlayer.create(getApplicationContext(),R.raw.chicksounds);
+                    mpLayer.start();
+                    resetTimer();
+                }
+            }.start();
+        }
+
     }
 
     public void upDateTimer(int secondLeft){
@@ -49,10 +74,11 @@ public class MainActivity extends AppCompatActivity {
 
         timerSeekBar = findViewById(R.id.timerSeekBar);
         timerTextView = findViewById(R.id.countdownTextView);
+        goButton =  findViewById(R.id.goButton);
 
 
         timerSeekBar.setMax(600);
-        timerSeekBar.setProgress(30);
+        timerSeekBar.setProgress(0);
 
         timerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
